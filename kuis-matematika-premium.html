@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kuis Matematika Premium</title>
+<style>
+body{font-family:Segoe UI,sans-serif;margin:0;background:linear-gradient(135deg,#4facfe,#00f2fe)}
+.wrap{max-width:900px;margin:20px auto;background:#fff;border-radius:24px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.teacher{font-size:90px;text-align:center;animation:bounce 2s infinite}
+@keyframes bounce{50%{transform:translateY(-8px)}}
+h1{text-align:center;color:#ff6b00}
+.progress{height:22px;background:#eee;border-radius:20px;overflow:hidden}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#00c853,#ffd600)}
+.card{padding:20px;margin-top:20px;background:#f8f9ff;border-radius:18px}
+#question{font-size:30px;text-align:center}
+.option{display:block;width:100%;margin:10px 0;padding:14px;border:none;border-radius:12px;font-size:20px;cursor:pointer}
+.option:hover{transform:scale(1.02)}
+.stats{display:flex;justify-content:space-between;font-weight:bold}
+.badge{background:#ffd54f;padding:6px 12px;border-radius:20px}
+#certificate{display:none;text-align:center}
+.star{font-size:40px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="teacher">👩‍🏫</div>
+<h1>🏆 Kuis Matematika Premium Kelas 1 SD</h1>
+<div class="stats">
+<div>Skor: <span id="score">0</span></div>
+<div>⭐ Bintang: <span id="stars">0</span></div>
+<div class="badge">Timer: <span id="timer">20</span></div>
+</div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div class="card">
+<div id="question"></div>
+<div id="options"></div>
+<div id="result"></div>
+</div>
+<div id="certificate">
+<h2>🎓 Sertifikat Kelulusan</h2>
+<p>Selamat telah menyelesaikan kuis!</p>
+<h3 id="final"></h3>
+<button onclick="window.print()">🖨 Cetak Sertifikat</button>
+</div>
+</div>
+
+<script>
+const quiz=[];
+for(let i=1;i<=50;i++){
+ let a=Math.floor(Math.random()*10);
+ let b=Math.floor(Math.random()*10);
+ quiz.push({q:`${a} + ${b} = ?`,a:String(a+b),o:[String(a+b),String(a+b+1),String(Math.max(0,a+b-1)),String(a+b+2)].sort(()=>Math.random()-0.5)});
+}
+let current=0,score=0,stars=0,time=20,iv;
+
+function speak(t){
+ const u=new SpeechSynthesisUtterance(t);
+ u.lang='id-ID';
+ speechSynthesis.speak(u);
+}
+
+function startTimer(){
+ clearInterval(iv);
+ time=20;
+ timer.textContent=time;
+ iv=setInterval(()=>{
+  time--;
+  timer.textContent=time;
+  if(time<=0){clearInterval(iv);next();}
+ },1000);
+}
+
+function load(){
+ if(current>=quiz.length){
+  certificate.style.display='block';
+  document.querySelector('.card').style.display='none';
+  final.textContent=`Nilai Akhir ${score} | Bintang ${stars}`;
+  return;
+ }
+ let q=quiz[current];
+ question.innerHTML=`Soal ${current+1}/50<br><br>${q.q}`;
+ bar.style.width=((current/50)*100)+'%';
+ options.innerHTML='';
+ q.o.forEach(x=>{
+  let b=document.createElement('button');
+  b.className='option';
+  b.innerText=x;
+  b.onclick=()=>check(x);
+  options.appendChild(b);
+ });
+ speak("Perhatikan soal. " + q.q);
+ startTimer();
+}
+
+function check(ans){
+ clearInterval(iv);
+ if(ans===quiz[current].a){
+   score+=2; stars++;
+   result.innerHTML='✅ Hebat!';
+   speak('Hebat jawaban benar');
+ }else{
+   result.innerHTML='❌ Tetap semangat';
+   speak('Tetap semangat belajar');
+ }
+ document.getElementById('score').textContent=score;
+ document.getElementById('stars').textContent=stars;
+ setTimeout(next,1000);
+}
+
+function next(){current++;load();}
+load();
+</script>
+</body>
+</html>
